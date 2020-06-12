@@ -1,2 +1,2 @@
 # DatabaseDemo
-some part of database simple demo implementation with java
+some parts of database simple demo implementated with java
