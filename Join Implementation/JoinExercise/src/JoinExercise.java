@@ -1,8 +1,11 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-
 
 /**
  * Compile the code with:
@@ -81,20 +84,51 @@ public class JoinExercise {
      * @param joinResult    Result of the lineitem ⋈ orders join.
      */
     static void nestedLoopJoin(List<LineitemTuple> lineitems, List<OrderTuple> orders, List<JoinResultTuple> joinResult) {
-        //////////////
-        // Your code//
-        //////////////
+    	for(LineitemTuple Ltuples : lineitems) {
+    		for(OrderTuple Otuples : orders) {
+    			if(Ltuples.orderkey == Otuples.orderkey) {
+    				JoinResultTuple jointuple= new JoinResultTuple(Ltuples.orderkey,Ltuples.shipdate,Otuples.orderdate);
+    				joinResult.add(jointuple);
+    			}
+    		}
+    	}
     }
 
     /**
      * @param lineitems     List of tuples from the lineItems table.
      * @param orders        List of tuples from the orders table.
-     * @param joinResult    Result of the lineitem ⋈ orders join.
+     * @param joinResult    Result of the lineitem 鈰� orders join.
      */
     static void hashJoin(List<LineitemTuple> lineitems, List<OrderTuple> orders, List<JoinResultTuple> joinResult) {
-        //////////////
-        // Your code//
-        //////////////
+    	long startTime = System.currentTimeMillis();
+    	HashMap<Integer, List<OrderTuple>> bucket1 = new HashMap<Integer, List<OrderTuple>>();
+    	for(OrderTuple Otuples : orders) {
+    		if(bucket1.containsKey(Otuples.hashCode())) {
+    			bucket1.get(Otuples.hashCode()).add(Otuples);
+    		}else {
+    			List<OrderTuple> OrderTuplesList = new ArrayList<>();
+    			OrderTuplesList.add(Otuples);
+    			bucket1.put(Otuples.hashCode(),OrderTuplesList);
+    		}
+        	
+        }
+    	long endTime = System.currentTimeMillis();
+    	System.out.println("Index create time: " + (endTime - startTime) + "ms.");
+    	for(LineitemTuple Ltuples : lineitems) {
+        	if(bucket1.containsKey(Ltuples.hashCode())) {
+        		List<OrderTuple> OtupleList = bucket1.get(Ltuples.hashCode());
+        		for(int i =0; i < OtupleList.size(); i++) {
+        			if(OtupleList.get(i).orderkey!=Ltuples.orderkey) {
+            			continue;
+            		}else {
+            			JoinResultTuple jointuple= new JoinResultTuple(Ltuples.orderkey,Ltuples.shipdate,OtupleList.get(i).orderdate);
+        				joinResult.add(jointuple);        			
+            		}			
+        		}
+        			
+        	}
+        }
+    	
     }
 
 }

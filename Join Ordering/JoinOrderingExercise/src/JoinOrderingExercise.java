@@ -68,30 +68,146 @@ public class JoinOrderingExercise {
     *   There are additional useful functions, which should be understandable by reading the comments.
     */
 
-    static JoinTree computeGreedy1(IRelationDirectory directory) {
+    static JoinTree computeGreedy1(IRelationDirectory directory) { 
+    	List<Pair<String, Integer>> RelationList = new ArrayList<>();
+    	List<Pair<String, Integer>> relations = directory.getRelations();
+        while(!relations.isEmpty()) {
+        	Pair<String, Integer> min = null;
+        	for (Pair<String, Integer> entry : relations) {
+        	    if (min == null || min.getValue() > entry.getValue()) {
+        	        min = entry;
+        	    }
+        	}
+        	for (int i=0; i<relations.size(); i++) {//eliminate minimum relation 
+        		if(min==relations.get(i)) {
+        			relations.remove(i);
+        			
+        		}       		
+        	}
+        	RelationList.add(min);		        	
+        }
+        List<JoinTree> JoinTreeList = new ArrayList<>();
+        for(int i=0; i<RelationList.size(); i++) {//generate the join tree
+        	if(i==0) {
+        		Relation a = new Relation(RelationList.get(i).getKey());
+            	Relation b = new Relation(RelationList.get(i+1).getKey());
+            	JoinTreeList.add(new Join(a,b));
+        	}else if(i==1) {
+        		i++;
+        	}else {
+        		Relation a = new Relation(RelationList.get(i).getKey());
+        		JoinTreeList.add(new Join(JoinTreeList.get(i-2),a));
+        	}
+        	
+        }
+        JoinTree LeftJoinTree = JoinTreeList.get(JoinTreeList.size());
+        return LeftJoinTree;
 
-        ///////////////
-        // Your code //
-        ///////////////
-       
-        return null;
     }
 
     static JoinTree computeGreedy2(IRelationDirectory directory) {
-
-        ///////////////
-        // Your code //
-        ///////////////
-        
-        return null;
-    }
+    	List<Pair<String, Integer>> RelationSequence = new ArrayList<>();
+    	List<Pair<String, Integer>> relations = directory.getRelations();
+        while(!relations.isEmpty()) {
+        	double min = 0;
+        	double Cardinality = 0;
+        	Pair<String, Integer> k = null;
+        	for (Pair<String, Integer> entry : relations) {
+        	    if (min == 0 || RelationSequence.size()==0 || min> entry.getValue()) {
+        	    	k = entry;
+        	    	min = relations.get(0).getValue();
+        	    	continue;
+        	    }else if(RelationSequence.size()==1) {
+    	    		Relation a = new Relation(RelationSequence.get(0).getKey());
+    	    		Relation b = new Relation(entry.getKey());
+    	    		Join intermediateResult = new Join(a,b);
+    	    		Cardinality = intermediateResult.cardinality(directory);
+    	    		if(min>Cardinality) {
+    	    			min = Cardinality;
+    	    			k = entry;
+    	    			Join intermediateSequence = intermediateResult;
+    	    			continue;
+    	    		}		
+    	    	}else {
+    	    		Relation Rk = new Relation(entry.getKey());
+    	    		Join temp = new Join(intermediateSequence,Rk);
+    	    		min = Cardinality;
+	    			k = entry;
+    	    	}
+        	    	
+        	    }
+        	}
+        	relations.remove(k);//eliminate Rk from R 
+        	RelationSequence.add(k); //append Rk to S
+        	List<JoinTree> JoinTreeList = new ArrayList<>();
+        	for(int i=0; i<RelationSequence.size(); i++) {//generate the join tree
+            	if(i==0) {
+            		Relation a = new Relation(RelationSequence.get(i).getKey());
+                	Relation b = new Relation(RelationSequence.get(i+1).getKey());
+                	JoinTreeList.add(new Join(a,b));
+            	}else if(i==1) {
+            		i++;
+            	}else {
+            		Relation a = new Relation(RelationSequence.get(i).getKey());
+            		JoinTreeList.add(new Join(JoinTreeList.get(i-2),a));
+            	}
+            	
+            }
+            JoinTree LeftJoinTree = JoinTreeList.get(JoinTreeList.size());
+            return LeftJoinTree;
+        }	
+    
 
     static JoinTree computeGreedy3(IRelationDirectory directory) {
-
-        ///////////////
-        // Your code //
-        ///////////////
-        return null;
+    	List<Pair<String, Integer>> RelationSequence = new ArrayList<>();
+    	List<Pair<String, Integer>> relations = directory.getRelations();
+        while(!relations.isEmpty()) {
+        	double min = 0;
+        	double Cardinality = 0;
+        	Pair<String, Integer> k = null;
+        	for (Pair<String, Integer> entry : relations) {
+        	    if (min == 0 || RelationSequence.size()==0 || min> entry.getValue()) {
+        	    	k = entry;
+        	    	min = relations.get(0).getValue();
+        	    	continue;
+        	    }else if(RelationSequence.size()==1) {
+    	    		Relation a = new Relation(RelationSequence.get(0).getKey());
+    	    		Relation b = new Relation(entry.getKey());
+    	    		Join intermediateResult = new Join(a,b);
+    	    		Cardinality = intermediateResult.getSelectivity(directory);
+    	    		if(min>Cardinality) {
+    	    			min = Cardinality;
+    	    			k = entry;
+    	    			Join intermediateSequence = intermediateResult;
+    	    			continue;
+    	    		}		
+    	    	}else {
+    	    		Relation Rk = new Relation(entry.getKey());
+    	    		Join temp = new Join(intermediateSequence,Rk);
+    	    		min = Cardinality;
+	    			k = entry;
+    	    	}
+        	    	
+        	    }
+        	}
+        	relations.remove(k);//eliminate Rk from R 
+        	RelationSequence.add(k); //append Rk to S
+        	List<JoinTree> JoinTreeList = new ArrayList<>();
+        	for(int i=0; i<RelationSequence.size(); i++) {//generate the join tree
+            	if(i==0) {
+            		Relation a = new Relation(RelationSequence.get(i).getKey());
+                	Relation b = new Relation(RelationSequence.get(i+1).getKey());
+                	JoinTreeList.add(new Join(a,b));
+            	}else if(i==1) {
+            		i++;
+            	}else {
+            		Relation a = new Relation(RelationSequence.get(i).getKey());
+            		JoinTreeList.add(new Join(JoinTreeList.get(i-2),a));
+            	}
+            	
+            }
+            JoinTree LeftJoinTree = JoinTreeList.get(JoinTreeList.size());
+            return LeftJoinTree;
     }
 
     static JoinTree computeBestPlan(IRelationDirectory directory) {
